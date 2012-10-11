@@ -61,6 +61,7 @@ public class VTCallForwardOptions extends TimeConsumingPreferenceActivity {
 
     private boolean mFirstResume;
     private Bundle mIcicle;
+    private int mSubscription = 0;
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -78,6 +79,11 @@ public class VTCallForwardOptions extends TimeConsumingPreferenceActivity {
         mButtonCFB.setParentActivity(this, mButtonCFB.reason);
         mButtonCFNRy.setParentActivity(this, mButtonCFNRy.reason);
         mButtonCFNRc.setParentActivity(this, mButtonCFNRc.reason);
+
+        mButtonCFU.setParameter(this, mSubscription);
+        mButtonCFB.setParameter(this, mSubscription);
+        mButtonCFNRy.setParameter(this, mSubscription);
+        mButtonCFNRc.setParameter(this, mSubscription);
 
         mPreferences.add(mButtonCFU);
         mPreferences.add(mButtonCFB);
@@ -103,10 +109,8 @@ public class VTCallForwardOptions extends TimeConsumingPreferenceActivity {
         super.onResume();
 
         if (mFirstResume) {
-            if (mIcicle == null) {
-                if (DBG) Log.d(LOG_TAG, "start to init ");
-                mPreferences.get(mInitIndex).init(this, false);
-            } else {
+
+            if (mIcicle != null) {
                 mInitIndex = mPreferences.size();
 
                 for (CallForwardEditPreference pref : mPreferences) {
@@ -116,9 +120,13 @@ public class VTCallForwardOptions extends TimeConsumingPreferenceActivity {
                     cf.number = bundle.getString(KEY_NUMBER);
                     cf.status = bundle.getInt(KEY_STATUS);
                     pref.handleCallForwardResult(cf);
-                    pref.init(this, true);
+                    pref.init(true);
                 }
             }
+            for (CallForwardEditPreference pref : mPreferences) {
+                pref.setSummaryOff(R.string.sum_cf_update);
+            }
+
             mFirstResume = false;
             mIcicle=null;
         }
@@ -141,10 +149,11 @@ public class VTCallForwardOptions extends TimeConsumingPreferenceActivity {
 
     @Override
     public void onFinished(Preference preference, boolean reading) {
-        if (mInitIndex < mPreferences.size()-1 && !isFinishing()) {
-            mInitIndex++;
-            mPreferences.get(mInitIndex).init(this, false);
-        }
+
+//        if (mInitIndex < mPreferences.size()-1 && !isFinishing()) {
+//            mInitIndex++;
+//            mPreferences.get(mInitIndex).init(false);
+//        }
 
         super.onFinished(preference, reading);
     }
